@@ -1,0 +1,11 @@
+# 启用URL重写
+RewriteEngine On
+
+# 短链访问：/s/代码 -> view.php?code=代码
+RewriteRule ^s/([a-zA-Z0-9]+)$ view.php?code=$1 [L,QSA]
+
+# API路由（保留原有的查询参数方式）
+# api.php?action=create 直接访问即可
+
+# 如果请求的不是真实文件或目录，不进行重定向（保持原文件访问）
+
