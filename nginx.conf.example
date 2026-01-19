@@ -1,0 +1,38 @@
+# Nginx配置文件示例
+# 将以下配置添加到您的Nginx站点配置文件中（通常在 /usr/local/nginx/conf/vhost/ 目录下）
+
+server {
+    listen 80;
+    server_name huodong.fszi.org;
+    
+    root /home/wwwroot/huodong.fszi.org;  # 修改为您的网站根目录
+    index index.php index.html index.htm;
+    
+    # 短链访问：/s/代码 -> view.php?code=代码
+    location ~ ^/s/([a-zA-Z0-9]+)$ {
+        try_files $uri /view.php?code=$1;
+    }
+    
+    # PHP处理
+    location ~ \.php$ {
+        fastcgi_pass unix:/tmp/php-cgi.sock;  # LNMP默认使用unix socket，或使用 127.0.0.1:9000
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+    
+    # 其他静态文件
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+    
+    # 默认处理
+    location / {
+        try_files $uri $uri/ /index.php;
+    }
+}
+
+# 配置完成后，需要执行：
+# nginx -t  # 测试配置
+# /etc/init.d/nginx reload  # 重载配置

@@ -38,18 +38,24 @@ define('BASE_URL', 'https://yourdomain.com');  // 修改为您的域名
 #### Apache
 确保已启用 `mod_rewrite` 模块，`.htaccess` 文件已包含在项目中。
 
-#### Nginx
-在Nginx配置中添加：
+#### Nginx（LNMP环境）
+
+在Nginx站点配置文件中添加（通常在 `/usr/local/nginx/conf/vhost/域名.conf`）：
 
 ```nginx
-location / {
-    try_files $uri $uri/ /index.php?$query_string;
-}
-
+# 短链访问：/s/代码 -> view.php?code=代码
 location ~ ^/s/([a-zA-Z0-9]+)$ {
-    rewrite ^/s/([a-zA-Z0-9]+)$ /view.php?code=$1 last;
+    try_files $uri /view.php?code=$1;
 }
 ```
+
+配置完成后执行：
+```bash
+nginx -t  # 测试配置
+/etc/init.d/nginx reload  # 重载配置
+```
+
+**注意**：如果无法修改Nginx配置，可以临时使用 `view.php?code=短链代码` 的方式直接访问。
 
 ### 5. 设置文件权限
 

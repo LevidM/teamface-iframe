@@ -7,7 +7,7 @@ define('DB_PASS', '');
 define('DB_CHARSET', 'utf8mb4');
 
 // 网站基础URL（需要根据实际情况修改）
-define('BASE_URL', 'http://localhost');  // 修改为您的域名，如：https://yourdomain.com
+define('BASE_URL', 'http://huodong.fszi.org');  // 修改为您的域名，如：https://yourdomain.com
 
 // 数据库连接
 function getDbConnection() {

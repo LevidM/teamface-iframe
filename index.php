@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iframe短链生成器 - 过滤弹窗</title>
+    <title>百度弹窗过滤器--工总内部使用</title>
     <style>
         * {
             margin: 0;
@@ -182,22 +182,22 @@
 </head>
 <body>
     <div class="container">
-        <h1>iframe短链生成器</h1>
-        <p style="text-align: center; color: #666; margin-bottom: 30px;">生成过滤弹窗的内嵌链接</p>
+        <h1>百度弹窗过滤器</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">生成过滤弹窗的新链接</p>
         
         <div id="message" class="message"></div>
         
         <form id="linkForm">
             <div class="form-group">
-                <label for="url">输入需要内嵌的链接：</label>
+                <label for="url">输入需要过滤的链接：</label>
                 <input type="url" id="url" name="url" placeholder="https://example.com/page" required>
             </div>
-            <button type="submit" id="submitBtn">生成短链</button>
+            <button type="submit" id="submitBtn">生成链接</button>
         </form>
         
         <div id="result" class="result">
             <div class="result-item">
-                <div class="result-label">短链地址：</div>
+                <div class="result-label">链接地址：</div>
                 <div class="short-url">
                     <input type="text" id="shortUrl" readonly>
                     <button class="copy-btn" onclick="copyUrl()">复制</button>
@@ -252,7 +252,7 @@
                     qrContainer.innerHTML = '<img src="qr.php?code=' + data.short_code + '" alt="二维码">';
                     
                     result.classList.add('show');
-                    showMessage('短链生成成功！', 'success');
+                    showMessage('链接生成成功！', 'success');
                 } else {
                     showMessage(data.message || '生成失败', 'error');
                 }
@@ -261,7 +261,7 @@
                 console.error(error);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = '生成短链';
+                submitBtn.textContent = '生成链接';
             }
         });
         
