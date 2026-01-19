@@ -63,11 +63,23 @@ try {
     } else {
         echo "<p style='color:green'>✅ 成功获取页面内容 (" . strlen($html) . " 字节)</p>";
         
-        // 显示前1000字符
-        echo "<h3>页面前1000字符：</h3>";
-        echo "<pre style='max-height:300px;overflow:auto;background:#f5f5f5;padding:10px;'>";
-        echo htmlspecialchars(substr($html, 0, 1000));
+        // 显示前3000字符（查看更多内容）
+        echo "<h3>页面前3000字符：</h3>";
+        echo "<pre style='max-height:500px;overflow:auto;background:#f5f5f5;padding:10px;font-size:12px;'>";
+        echo htmlspecialchars(substr($html, 0, 3000));
         echo "</pre>";
+        
+        // 尝试查找所有meta标签
+        echo "<h3>所有meta标签：</h3>";
+        if (preg_match_all('/<meta[^>]+>/i', $html, $metaMatches)) {
+            echo "<pre style='max-height:300px;overflow:auto;background:#f5f5f5;padding:10px;font-size:12px;'>";
+            foreach ($metaMatches[0] as $metaTag) {
+                echo htmlspecialchars($metaTag) . "\n";
+            }
+            echo "</pre>";
+        } else {
+            echo "<p style='color:orange'>未找到任何meta标签</p>";
+        }
         
         // 尝试提取
         $patterns = [

@@ -80,39 +80,123 @@ function extractMetaInfo($url) {
             return $meta;
         }
         
-        // 使用正则表达式提取meta标签
+        // 尝试使用DOMDocument解析（更可靠）
+        $useDom = false;
+        if (class_exists('DOMDocument')) {
+            libxml_use_internal_errors(true);
+            $dom = new DOMDocument();
+            @$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
+            $xpath = new DOMXPath($dom);
+            $useDom = true;
+        }
+        
         // 提取 og:title 或 title
-        if (preg_match('/<meta\s+property=["\']og:title["\']\s+content=["\']([^"\']+)["\']/i', $html, $matches)) {
-            $meta['title'] = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
-        } elseif (preg_match('/<title[^>]*>([^<]+)<\/title>/i', $html, $matches)) {
-            $meta['title'] = html_entity_decode(trim($matches[1]), ENT_QUOTES, 'UTF-8');
+        if ($useDom) {
+            // 使用XPath查找og:title
+            $nodes = $xpath->query("//meta[@property='og:title']/@content");
+            if ($nodes->length > 0) {
+                $meta['title'] = trim($nodes->item(0)->nodeValue);
+            } else {
+                // 查找title标签
+                $titleNodes = $xpath->query("//title");
+                if ($titleNodes->length > 0) {
+                    $meta['title'] = trim($titleNodes->item(0)->nodeValue);
+                }
+            }
+        }
+        
+        // 如果DOM解析失败，使用正则表达式
+        if (empty($meta['title'])) {
+            // 更宽松的正则表达式，处理各种格式
+            $patterns = [
+                '/<meta\s+property\s*=\s*["\']og:title["\']\s+content\s*=\s*["\']([^"\']+)["\']/i',
+                '/<meta\s+content\s*=\s*["\']([^"\']+)["\']\s+property\s*=\s*["\']og:title["\']/i',
+                '/<title[^>]*>([^<]+)<\/title>/is',
+            ];
+            foreach ($patterns as $pattern) {
+                if (preg_match($pattern, $html, $matches)) {
+                    $meta['title'] = html_entity_decode(trim($matches[1]), ENT_QUOTES, 'UTF-8');
+                    break;
+                }
+            }
         }
         
         // 提取 og:description 或 description
-        if (preg_match('/<meta\s+property=["\']og:description["\']\s+content=["\']([^"\']+)["\']/i', $html, $matches)) {
-            $meta['description'] = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
-        } elseif (preg_match('/<meta\s+name=["\']description["\']\s+content=["\']([^"\']+)["\']/i', $html, $matches)) {
-            $meta['description'] = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
+        if ($useDom) {
+            $nodes = $xpath->query("//meta[@property='og:description']/@content");
+            if ($nodes->length > 0) {
+                $meta['description'] = trim($nodes->item(0)->nodeValue);
+            } else {
+                $nodes = $xpath->query("//meta[@name='description']/@content");
+                if ($nodes->length > 0) {
+                    $meta['description'] = trim($nodes->item(0)->nodeValue);
+                }
+            }
+        }
+        
+        if (empty($meta['description'])) {
+            $patterns = [
+                '/<meta\s+property\s*=\s*["\']og:description["\']\s+content\s*=\s*["\']([^"\']+)["\']/i',
+                '/<meta\s+content\s*=\s*["\']([^"\']+)["\']\s+property\s*=\s*["\']og:description["\']/i',
+                '/<meta\s+name\s*=\s*["\']description["\']\s+content\s*=\s*["\']([^"\']+)["\']/i',
+            ];
+            foreach ($patterns as $pattern) {
+                if (preg_match($pattern, $html, $matches)) {
+                    $meta['description'] = html_entity_decode(trim($matches[1]), ENT_QUOTES, 'UTF-8');
+                    break;
+                }
+            }
         }
         
         // 提取 og:image
-        if (preg_match('/<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']+)["\']/i', $html, $matches)) {
-            $imageUrl = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
-            // 如果是相对URL，转换为绝对URL
-            if (!preg_match('/^https?:\/\//', $imageUrl)) {
-                $parsed = parse_url($url);
-                $base = $parsed['scheme'] . '://' . $parsed['host'];
-                if (isset($parsed['port'])) {
-                    $base .= ':' . $parsed['port'];
+        if ($useDom) {
+            $nodes = $xpath->query("//meta[@property='og:image']/@content");
+            if ($nodes->length > 0) {
+                $imageUrl = trim($nodes->item(0)->nodeValue);
+                // 如果是相对URL，转换为绝对URL
+                if (!preg_match('/^https?:\/\//', $imageUrl)) {
+                    $parsed = parse_url($url);
+                    $base = $parsed['scheme'] . '://' . $parsed['host'];
+                    if (isset($parsed['port'])) {
+                        $base .= ':' . $parsed['port'];
+                    }
+                    if (strpos($imageUrl, '/') !== 0) {
+                        $path = dirname($parsed['path'] ?? '/');
+                        $imageUrl = $base . $path . '/' . $imageUrl;
+                    } else {
+                        $imageUrl = $base . $imageUrl;
+                    }
                 }
-                if (strpos($imageUrl, '/') !== 0) {
-                    $path = dirname($parsed['path'] ?? '/');
-                    $imageUrl = $base . $path . '/' . $imageUrl;
-                } else {
-                    $imageUrl = $base . $imageUrl;
+                $meta['image'] = $imageUrl;
+            }
+        }
+        
+        if (empty($meta['image'])) {
+            $patterns = [
+                '/<meta\s+property\s*=\s*["\']og:image["\']\s+content\s*=\s*["\']([^"\']+)["\']/i',
+                '/<meta\s+content\s*=\s*["\']([^"\']+)["\']\s+property\s*=\s*["\']og:image["\']/i',
+            ];
+            foreach ($patterns as $pattern) {
+                if (preg_match($pattern, $html, $matches)) {
+                    $imageUrl = html_entity_decode(trim($matches[1]), ENT_QUOTES, 'UTF-8');
+                    // 如果是相对URL，转换为绝对URL
+                    if (!preg_match('/^https?:\/\//', $imageUrl)) {
+                        $parsed = parse_url($url);
+                        $base = $parsed['scheme'] . '://' . $parsed['host'];
+                        if (isset($parsed['port'])) {
+                            $base .= ':' . $parsed['port'];
+                        }
+                        if (strpos($imageUrl, '/') !== 0) {
+                            $path = dirname($parsed['path'] ?? '/');
+                            $imageUrl = $base . $path . '/' . $imageUrl;
+                        } else {
+                            $imageUrl = $base . $imageUrl;
+                        }
+                    }
+                    $meta['image'] = $imageUrl;
+                    break;
                 }
             }
-            $meta['image'] = $imageUrl;
         }
         
         // 限制长度
