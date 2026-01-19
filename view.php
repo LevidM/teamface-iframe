@@ -24,8 +24,24 @@ try {
     $originalUrl = htmlspecialchars($link['original_url'], ENT_QUOTES, 'UTF-8');
     $domain = $link['domain'] ?? '';
     
+    // 获取meta信息（用于微信转发）
+    $metaTitle = $link['meta_title'] ?? '';
+    $metaDescription = $link['meta_description'] ?? '';
+    $metaImage = $link['meta_image'] ?? '';
+    
+    // 如果没有meta信息，使用默认值
+    if (empty($metaTitle)) {
+        $metaTitle = '内嵌页面';
+    }
+    if (empty($metaDescription)) {
+        $metaDescription = '点击查看页面内容';
+    }
+    
     // 生成CSP策略
     $cspDomain = $domain ? "https://{$domain}" : "*";
+    
+    // 生成完整的短链URL（用于og:url）
+    $shortUrl = BASE_URL . '/s/' . $code;
     
 } catch (Exception $e) {
     die('数据库错误: ' . $e->getMessage());
@@ -36,6 +52,29 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 基础meta信息 -->
+    <title><?php echo htmlspecialchars($metaTitle, ENT_QUOTES, 'UTF-8'); ?></title>
+    <meta name="description" content="<?php echo htmlspecialchars($metaDescription, ENT_QUOTES, 'UTF-8'); ?>">
+    
+    <!-- Open Graph meta标签（微信、Facebook等） -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="<?php echo htmlspecialchars($metaTitle, ENT_QUOTES, 'UTF-8'); ?>">
+    <meta property="og:description" content="<?php echo htmlspecialchars($metaDescription, ENT_QUOTES, 'UTF-8'); ?>">
+    <meta property="og:url" content="<?php echo htmlspecialchars($shortUrl, ENT_QUOTES, 'UTF-8'); ?>">
+    <?php if (!empty($metaImage)): ?>
+    <meta property="og:image" content="<?php echo htmlspecialchars($metaImage, ENT_QUOTES, 'UTF-8'); ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <?php endif; ?>
+    
+    <!-- 微信专用meta标签 -->
+    <meta itemprop="name" content="<?php echo htmlspecialchars($metaTitle, ENT_QUOTES, 'UTF-8'); ?>">
+    <meta itemprop="description" content="<?php echo htmlspecialchars($metaDescription, ENT_QUOTES, 'UTF-8'); ?>">
+    <?php if (!empty($metaImage)): ?>
+    <meta itemprop="image" content="<?php echo htmlspecialchars($metaImage, ENT_QUOTES, 'UTF-8'); ?>">
+    <?php endif; ?>
+    
     <!-- Content Security Policy: 阻止所有baidu相关的资源 -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' <?php echo $cspDomain; ?>; script-src 'self' <?php echo $cspDomain; ?> 'unsafe-inline' 'unsafe-eval'; style-src 'self' <?php echo $cspDomain; ?> 'unsafe-inline'; img-src 'self' <?php echo $cspDomain; ?> data: https:; font-src 'self' <?php echo $cspDomain; ?> data:; connect-src 'self' <?php echo $cspDomain; ?>; frame-src 'self' <?php echo $cspDomain; ?>; object-src 'none'; base-uri 'self'; form-action 'self' <?php echo $cspDomain; ?>;">
 </head>

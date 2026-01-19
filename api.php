@@ -58,9 +58,19 @@ function createShortLink() {
             // 提取域名
             $domain = extractDomain($url);
             
+            // 提取meta信息（异步处理，避免阻塞）
+            $metaInfo = extractMetaInfo($url);
+            
             // 插入数据库
-            $stmt = $pdo->prepare("INSERT INTO links (short_code, original_url, domain) VALUES (?, ?, ?)");
-            $stmt->execute([$shortCode, $url, $domain]);
+            $stmt = $pdo->prepare("INSERT INTO links (short_code, original_url, domain, meta_title, meta_description, meta_image) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $shortCode, 
+                $url, 
+                $domain,
+                $metaInfo['title'],
+                $metaInfo['description'],
+                $metaInfo['image']
+            ]);
         }
         
         $shortUrl = BASE_URL . '/s/' . $shortCode;
