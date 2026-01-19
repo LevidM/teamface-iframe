@@ -183,7 +183,7 @@
 <body>
     <div class="container">
         <h1>百度弹窗过滤器</h1>
-        <p style="text-align: center; color: #666; margin-bottom: 30px;">生成过滤弹窗的新链接</p>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">工总专用———生成过滤弹窗的新链接</p>
         
         <div id="message" class="message"></div>
         
