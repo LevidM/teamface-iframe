@@ -287,7 +287,13 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    document.getElementById('shortUrl').value = data.short_url;
+                    // 构建短链URL（优先使用API返回的，否则使用short_code构建）
+                    let shortUrl = data.short_url;
+                    if (!shortUrl && data.short_code) {
+                        shortUrl = window.location.protocol + '//' + window.location.host + '/s/' + data.short_code;
+                    }
+                    
+                    document.getElementById('shortUrl').value = shortUrl || '';
                     document.getElementById('originalUrl').textContent = data.original_url;
                     
                     // 生成二维码（使用后端生成的二维码）
