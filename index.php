@@ -293,7 +293,7 @@
                         shortUrl = window.location.protocol + '//' + window.location.host + '/s/' + data.short_code;
                     }
                     
-                    document.getElementById('shortUrl').value = shortUrl;
+                    document.getElementById('shortUrl').value = short_url;
                     document.getElementById('originalUrl').textContent = data.original_url;
                     
                     // 生成二维码（使用后端生成的二维码）
