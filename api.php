@@ -40,6 +40,16 @@ function createShortLink() {
         $url = 'https://' . $url;
     }
     
+    // 获取用户输入的meta信息
+    $metaTitle = trim($input['meta_title'] ?? '');
+    $metaDescription = trim($input['meta_description'] ?? '');
+    $metaImage = trim($input['meta_image'] ?? '');
+    
+    // 如果图片为空，使用默认值
+    if (empty($metaImage)) {
+        $metaImage = 'http://cert.fszi.org/img/logo2.png';
+    }
+    
     try {
         $pdo = getDbConnection();
         
@@ -50,6 +60,16 @@ function createShortLink() {
         
         if ($existing) {
             $shortCode = $existing['short_code'];
+            // 如果已存在，更新meta信息（如果用户提供了新的）
+            if (!empty($metaTitle) || !empty($metaDescription) || !empty($metaImage)) {
+                $updateStmt = $pdo->prepare("UPDATE links SET meta_title = ?, meta_description = ?, meta_image = ? WHERE short_code = ?");
+                $updateStmt->execute([
+                    $metaTitle ?: null,
+                    $metaDescription ?: null,
+                    $metaImage,
+                    $shortCode
+                ]);
+            }
         } else {
             // 生成唯一的短链代码
             do {
@@ -61,18 +81,15 @@ function createShortLink() {
             // 提取域名
             $domain = extractDomain($url);
             
-            // 提取meta信息（异步处理，避免阻塞）
-            $metaInfo = extractMetaInfo($url);
-            
             // 插入数据库
             $stmt = $pdo->prepare("INSERT INTO links (short_code, original_url, domain, meta_title, meta_description, meta_image) VALUES (?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $shortCode, 
                 $url, 
                 $domain,
-                $metaInfo['title'],
-                $metaInfo['description'],
-                $metaInfo['image']
+                $metaTitle ?: null,
+                $metaDescription ?: null,
+                $metaImage
             ]);
         }
         

@@ -48,18 +48,32 @@
             font-weight: 500;
         }
         
-        input[type="url"] {
+        input[type="url"], input[type="text"], textarea {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 16px;
             transition: border-color 0.3s;
+            font-family: inherit;
+            box-sizing: border-box;
         }
         
-        input[type="url"]:focus {
+        input[type="url"]:focus, input[type="text"]:focus, textarea:focus {
             outline: none;
             border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        small {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #999;
         }
         
         button {
@@ -192,6 +206,25 @@
                 <label for="url">输入需要过滤的链接：</label>
                 <input type="url" id="url" name="url" placeholder="https://example.com/page" required>
             </div>
+            
+            <div class="form-group">
+                <label for="metaTitle">微信转发标题：</label>
+                <input type="text" id="metaTitle" name="metaTitle" placeholder="例如：碳排放管理员 | 国家职业技能等级培训与认定报名">
+                <small style="color:#666;font-size:12px;">不填写则使用默认值</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="metaDescription">微信转发描述：</label>
+                <textarea id="metaDescription" name="metaDescription" rows="3" placeholder="例如：2026年2月3日"></textarea>
+                <small style="color:#666;font-size:12px;">不填写则使用默认值</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="metaImage">微信转发缩略图：</label>
+                <input type="url" id="metaImage" name="metaImage" value="http://cert.fszi.org/img/logo2.png" placeholder="http://cert.fszi.org/img/logo2.png">
+                <small style="color:#666;font-size:12px;">默认已设置，可修改为其他图片URL</small>
+            </div>
+            
             <button type="submit" id="submitBtn">生成链接</button>
         </form>
         
@@ -228,6 +261,11 @@
                 return;
             }
             
+            // 获取meta信息
+            const metaTitle = document.getElementById('metaTitle').value.trim();
+            const metaDescription = document.getElementById('metaDescription').value.trim();
+            const metaImage = document.getElementById('metaImage').value.trim() || 'http://cert.fszi.org/img/logo2.png';
+            
             submitBtn.disabled = true;
             submitBtn.textContent = '生成中...';
             hideMessage();
@@ -238,7 +276,12 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ url: url })
+                    body: JSON.stringify({ 
+                        url: url,
+                        meta_title: metaTitle || null,
+                        meta_description: metaDescription || null,
+                        meta_image: metaImage
+                    })
                 });
                 
                 const data = await response.json();
