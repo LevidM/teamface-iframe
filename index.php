@@ -143,10 +143,13 @@
         
         .short-url input {
             flex: 1;
-            border: none;
+            border: none !important;
             padding: 5px;
             font-size: 14px;
-            background: transparent;
+            background: transparent !important;
+            color: #333 !important;
+            width: auto;
+            outline: none;
         }
         
         .copy-btn {
@@ -287,20 +290,28 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    // 构建短链URL（优先使用API返回的，否则使用short_code构建）
-                    let shortUrl = data.short_url;
-                    if (!shortUrl && data.short_code) {
-                        shortUrl = window.location.protocol + '//' + window.location.host + '/s/' + data.short_code;
-                    }
+                    // 构建短链URL（直接使用short_code，确保与二维码一致）
+                    const shortUrl = data.short_url || (window.location.protocol + '//' + window.location.host + '/s/' + data.short_code);
                     
-                    document.getElementById('shortUrl').value = 'http://huodong.fszi.org/s/' + data.short_code;
+                    // 显示结果区域
+                    result.classList.add('show');
+                    
+                    // 设置值（使用setTimeout确保DOM已渲染）
+                    setTimeout(function() {
+                        const shortUrlInput = document.getElementById('shortUrl');
+                        if (shortUrlInput) {
+                            shortUrlInput.value = shortUrl;
+                            console.log('设置的值:', shortUrl);
+                            console.log('input.value:', shortUrlInput.value);
+                        }
+                    }, 0);
+                    
                     document.getElementById('originalUrl').textContent = data.original_url;
                     
                     // 生成二维码（使用后端生成的二维码）
                     const qrContainer = document.getElementById('qrContainer');
                     qrContainer.innerHTML = '<img src="qr.php?code=' + data.short_code + '" alt="二维码">';
                     
-                    result.classList.add('show');
                     showMessage('链接生成成功！', 'success');
                 } else {
                     showMessage(data.message || '生成失败', 'error');
