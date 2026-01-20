@@ -213,19 +213,19 @@
             <div class="form-group">
                 <label for="metaTitle">微信转发标题：</label>
                 <input type="text" id="metaTitle" name="metaTitle" placeholder="例如：碳排放管理员 | 国家职业技能等级培训与认定报名">
-                <small style="color:#666;font-size:12px;">不填写则使用默认值</small>
+                <small style="color:#666;font-size:12px;">不填写则使用默认值：深圳工业总会最新活动</small>
             </div>
             
             <div class="form-group">
-                <label for="metaDescription">微信转发描述：</label>
+                <label for="metaDescription">微信转发摘要：</label>
                 <textarea id="metaDescription" name="metaDescription" rows="3" placeholder="例如：2026年2月3日"></textarea>
-                <small style="color:#666;font-size:12px;">不填写则使用默认值</small>
+                <small style="color:#666;font-size:12px;">不填写则使用默认值：点击查看详细内容</small>
             </div>
             
             <div class="form-group">
                 <label for="metaImage">微信转发缩略图：</label>
                 <input type="url" id="metaImage" name="metaImage" value="http://cert.fszi.org/img/logo2.png" placeholder="http://cert.fszi.org/img/logo2.png">
-                <small style="color:#666;font-size:12px;">默认已设置，可修改为其他图片URL</small>
+                <small style="color:#666;font-size:12px;">默认为工总logo，可修改为其他图片URL</small>
             </div>
             
             <button type="submit" id="submitBtn">生成链接</button>
