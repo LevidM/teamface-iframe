@@ -332,6 +332,7 @@ try {
             setTimeout(injectBlocker, 2000);
         })();
     </script>
+    <?php endif; ?>
 </body>
 </html>
 
