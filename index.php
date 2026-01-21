@@ -207,7 +207,7 @@
         <form id="linkForm">
             <div class="form-group">
                 <label for="url">输入需要过滤的链接：</label>
-                <input type="url" id="url" name="url" placeholder="https://example.com/page" required>
+                <input type="text" id="url" name="url" placeholder="https://example.com/page" required>
             </div>
             
             <div class="form-group">

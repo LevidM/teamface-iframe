@@ -29,14 +29,21 @@ function createShortLink() {
         exit;
     }
     
-    // 验证URL格式
-    if (!filter_var($url, FILTER_VALIDATE_URL)) {
-        echo json_encode(['success' => false, 'message' => 'URL格式无效']);
-        exit;
+    // 验证URL格式（使用更宽松的正则表达式，支持中文和特殊字符）
+    // 先尝试标准的filter_var验证
+    $isValidUrl = filter_var($url, FILTER_VALIDATE_URL);
+    
+    // 如果filter_var失败，使用正则表达式验证（更宽松，支持中文等特殊字符）
+    if (!$isValidUrl) {
+        // 匹配http://或https://开头的URL，支持中文字符和特殊字符
+        if (!preg_match('/^https?:\/\/[^\s<>"\'{}|\\^`\[\]]+/i', $url)) {
+            echo json_encode(['success' => false, 'message' => 'URL格式无效，请检查链接是否正确']);
+            exit;
+        }
     }
     
     // 确保URL有协议
-    if (!preg_match('/^https?:\/\//', $url)) {
+    if (!preg_match('/^https?:\/\//i', $url)) {
         $url = 'https://' . $url;
     }
     
