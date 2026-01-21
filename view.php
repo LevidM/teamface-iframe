@@ -84,12 +84,16 @@ try {
     <?php if ($isFeishuLink): ?>
     <!-- 飞书链接无法在iframe中嵌入，提供跳转按钮 -->
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:20px;text-align:center;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;">
-        <h2 style="margin-bottom:20px;font-size:24px;">飞书链接无法在iframe中打开</h2>
-        <p style="margin-bottom:30px;font-size:16px;line-height:1.6;">由于飞书的安全策略，该链接需要在浏览器中直接打开。点击下方按钮跳转到原链接。</p>
-        <a href="<?php echo htmlspecialchars($originalUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" style="display:inline-block;padding:15px 40px;background:white;color:#667eea;text-decoration:none;border-radius:8px;font-size:16px;font-weight:600;box-shadow:0 4px 15px rgba(0,0,0,0.2);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">在新窗口中打开链接</a>
+        <h2 style="margin-bottom:20px;font-size:24px;">跳转至报名页面</h2>
+        <p style="margin-bottom:30px;font-size:16px;line-height:1.6;">3秒后自动跳转到报名页面。如无反应，请手动点击下方按钮。</p>
+        <a href="<?php echo htmlspecialchars($originalUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" style="display:inline-block;padding:15px 40px;background:white;color:#667eea;text-decoration:none;border-radius:8px;font-size:16px;font-weight:600;box-shadow:0 4px 15px rgba(0,0,0,0.2);transition:transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">立即报名</a>
         <p style="margin-top:30px;font-size:14px;opacity:0.9;">提示：您也可以复制链接在浏览器中打开</p>
     </div>
     <script>
+        // 自动跳转设置（单位：毫秒）
+        // 3000 = 3秒后自动跳转，可根据需要修改此数值
+        var AUTO_JUMP_DELAY = 3000; // 修改此数值可调整自动跳转延迟时间（单位：毫秒）
+        
         // 尝试自动跳转（微信环境中可能被阻止）
         setTimeout(function() {
             try {
@@ -97,7 +101,7 @@ try {
             } catch(e) {
                 // 如果跳转失败，显示按钮让用户手动点击
             }
-        }, 1000);
+        }, AUTO_JUMP_DELAY);
     </script>
     <?php else: ?>
     <iframe 
